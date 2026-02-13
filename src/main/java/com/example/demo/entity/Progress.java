@@ -1,12 +1,14 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "progress")
+@Data
 public class Progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
