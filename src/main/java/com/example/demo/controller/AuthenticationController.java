@@ -1,61 +1,40 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
+import com.example.demo.entity.dto.JWTAuthentificationDto;
+import com.example.demo.entity.dto.LoginDto;
+import com.example.demo.entity.dto.RefreshTokenDto;
 import com.example.demo.entity.dto.RegisterDto;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashSet;
-
 @RestController
 @AllArgsConstructor
 public class AuthenticationController {
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterDto dto) {
-        User user = new User();
-        user.setName(dto.name());
-        user.setEmail(dto.email());
-        user.setPassword(passwordEncoder.encode(dto.password()));
-        userRepository.save(user);
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), user.getPassword(), new HashSet<>()
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("User with email " + user.getEmail() + " created");
+    public ResponseEntity<User> register(@RequestBody RegisterDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(dto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody RegisterDto dto) {
-        User user = userRepository.findByEmail(dto.email()).orElseThrow(
-                () -> new UsernameNotFoundException("User with email " + dto.email() + " not found")
-        );
-
-        if(!passwordEncoder.matches(dto.password(), user.getPassword()))
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), user.getPassword(), new HashSet<>()
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
-
-        return ResponseEntity.status(HttpStatus.OK).body("Login successful");
+    public ResponseEntity<JWTAuthentificationDto> login(@RequestBody LoginDto dto) {
+        try {
+            JWTAuthentificationDto jwtAuthenticationDto = userService.singIn(dto);
+            return ResponseEntity.ok(jwtAuthenticationDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<JWTAuthentificationDto> refreshToken(@RequestBody RefreshTokenDto refreshTokenDto) throws Exception {
+        return ResponseEntity.ok(userService.refreshToken(refreshTokenDto));
+    }
 }
