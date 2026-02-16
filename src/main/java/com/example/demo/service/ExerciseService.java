@@ -5,8 +5,5 @@ import com.example.demo.repository.ExerciseRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ExerciseService extends AbstractService<Exercise, Long> {
-    ExerciseService(ExerciseRepository repository) {
-        super(repository);
-    }
+public class ExerciseService extends CrudService<Exercise, ExerciseRepository, Long> {
 }

@@ -9,15 +9,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Component
-public class JWTCore {
-    @Value("${jwt.secret}")
-    private String secret;
+public class JwtCore {
+    private final String secret;
+    private final int authLifetime, refreshLifetime;
 
-    private int authLifetimeMs = 60 * 1000;
-    private int refreshLifetimeMs = 60 * 1000 * 60 * 24;
+    public JwtCore(@Value("${jwt.secret}") String secret,
+                   @Value("${jwt.access-token-expiration-minutes}") int authLifetime,
+                   @Value("${jwt.refresh-token-expiration-days}")int refreshLifetime) {
+        this.secret = secret;
+        this.authLifetime = authLifetime;
+        this.refreshLifetime = refreshLifetime;
+    }
 
     public JWTAuthentificationDto createAuthToken(String email) {
         return new JWTAuthentificationDto(generateAuthToken(email), generateRefreshToken(email));
@@ -51,20 +58,22 @@ public class JWTCore {
         }
     }
 
-    public String generateAuthToken(String email) {
+    private String generateAuthToken(String email) {
+        Date date = Date.from(LocalDateTime.now().plusMinutes(authLifetime).atZone(ZoneId.systemDefault()).toInstant());
         return Jwts
                 .builder()
                 .subject(email)
-                .expiration(new Date(System.currentTimeMillis() + authLifetimeMs))
+                .expiration(date)
                 .signWith(getSignKey())
                 .compact();
     }
 
-    public String generateRefreshToken(String email) {
+    private String generateRefreshToken(String email) {
+        Date date = Date.from(LocalDateTime.now().plusDays(refreshLifetime).atZone(ZoneId.systemDefault()).toInstant());
         return Jwts
                 .builder()
                 .subject(email)
-                .expiration(new Date(System.currentTimeMillis() + refreshLifetimeMs))
+                .expiration(date)
                 .signWith(getSignKey())
                 .compact();
     }

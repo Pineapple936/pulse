@@ -6,9 +6,9 @@ import com.example.demo.entity.dto.LoginDto;
 import com.example.demo.entity.dto.RefreshTokenDto;
 import com.example.demo.entity.dto.RegisterDto;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.security.JWTCore;
+import com.example.demo.security.JwtCore;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.data.jpa.repository.JpaRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,18 +20,20 @@ import java.util.HashSet;
 import java.util.Optional;
 
 @Service
-public class UserService extends AbstractService<User, Long> {
-    private UserRepository userRepository;
-    private JWTCore jwtCore;
-    private PasswordEncoder passwordEncoder;
+@RequiredArgsConstructor
+public class UserService extends CrudService<User, UserRepository, Long> {
+    private final JwtCore jwtCore;
+    private final PasswordEncoder passwordEncoder;
 
-    //TODO
-    public UserService(JpaRepository<User, Long> repository, UserRepository userRepository,
-                       JWTCore jwtCore, PasswordEncoder passwordEncoder) {
-        super(repository);
-        this.userRepository = userRepository;
-        this.jwtCore = jwtCore;
-        this.passwordEncoder = passwordEncoder;
+    public User save(RegisterDto dto) {
+        User user = super.save(new User(dto.name(), dto.email(), passwordEncoder.encode(dto.password())));
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.getEmail(), user.getPassword(), new HashSet<>()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return user;
     }
 
     public JWTAuthentificationDto singIn(LoginDto userCredentialsDto) throws AuthenticationException {
@@ -48,19 +50,8 @@ public class UserService extends AbstractService<User, Long> {
         throw new  AuthenticationException("Invalid refresh token");
     }
 
-    public User save(RegisterDto dto) {
-        User user = super.save(new User(dto.name(), dto.email(), passwordEncoder.encode(dto.password())));
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), user.getPassword(), new HashSet<>()
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return user;
-    }
-
     private User findByCredentials(LoginDto userCredentialsDto) throws AuthenticationException {
-        Optional<User> optionalUser = userRepository.findByEmail(userCredentialsDto.email());
+        Optional<User> optionalUser = repository.findByEmail(userCredentialsDto.email());
         if (optionalUser.isPresent()){
             User user = optionalUser.get();
             if (passwordEncoder.matches(userCredentialsDto.password(), user.getPassword())){
@@ -71,7 +62,7 @@ public class UserService extends AbstractService<User, Long> {
     }
 
     private User findByEmail(String email) throws EntityNotFoundException {
-        return userRepository.findByEmail(email).orElseThrow(
+        return repository.findByEmail(email).orElseThrow(
                 EntityNotFoundException::new
         );
     }

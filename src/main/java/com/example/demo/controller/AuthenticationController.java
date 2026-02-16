@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.naming.AuthenticationException;
+
 @RestController
 @AllArgsConstructor
 public class AuthenticationController {
@@ -28,7 +30,7 @@ public class AuthenticationController {
         try {
             JWTAuthentificationDto jwtAuthenticationDto = userService.singIn(dto);
             return ResponseEntity.ok(jwtAuthenticationDto);
-        } catch (Exception e) {
+        } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }

@@ -5,8 +5,5 @@ import com.example.demo.repository.ProgressRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ProgressService extends AbstractService<Progress, Long> {
-    ProgressService(ProgressRepository repository) {
-        super(repository);
-    }
+public class ProgressService extends CrudService<Progress, ProgressRepository, Long> {
 }

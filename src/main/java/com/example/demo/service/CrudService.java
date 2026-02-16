@@ -1,14 +1,20 @@
 package com.example.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public abstract class AbstractService<T, ID> {
-    private final JpaRepository<T, ID> repository;
+@Service
+@RequiredArgsConstructor
+public abstract class CrudService<T, R extends JpaRepository<T, ID>, ID> {
+    protected R repository;
 
-    public AbstractService(JpaRepository<T, ID> repository) {
+    @Autowired
+    public void setRepository(R repository) {
         this.repository = repository;
     }
 
