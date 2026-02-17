@@ -1,7 +1,9 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
@@ -20,8 +22,15 @@ public class Workout {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public Workout(String name, LocalDate date, User user) {
+        this.name = name;
+        this.date = date;
+        this.user = user;
+    }
 }

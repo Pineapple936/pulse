@@ -50,6 +50,11 @@ public class UserService extends CrudService<User, UserRepository, Long> {
         throw new  AuthenticationException("Invalid refresh token");
     }
 
+    public User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return findByEmail(email);
+    }
+
     private User findByCredentials(LoginDto userCredentialsDto) throws AuthenticationException {
         Optional<User> optionalUser = repository.findByEmail(userCredentialsDto.email());
         if (optionalUser.isPresent()){
@@ -63,7 +68,7 @@ public class UserService extends CrudService<User, UserRepository, Long> {
 
     private User findByEmail(String email) throws EntityNotFoundException {
         return repository.findByEmail(email).orElseThrow(
-                EntityNotFoundException::new
+                () -> new EntityNotFoundException("User with email " + email + " not found")
         );
     }
 }
