@@ -29,11 +29,11 @@ public class WorkoutService extends CrudService<Workout, WorkoutRepository, Long
         super.update(id, workout);
     }
 
-    public boolean hasCurrentUser(Workout workout) {
-        User currentUser = userService.getCurrentUser();
-        if (currentUser == null || workout == null || workout.getUser() == null) {
+    @Override
+    public boolean hasUser(Workout entry, User user) {
+        if (user == null || entry == null || entry.getUser() == null) {
             return false;
         }
-        return currentUser.getId().equals(workout.getUser().getId());
+        return user.getId().equals(entry.getUser().getId());
     }
 }

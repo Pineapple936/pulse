@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,4 +42,6 @@ public abstract class CrudService<T, R extends JpaRepository<T, ID>, ID> {
     public void delete(ID id) {
         repository.deleteById(id);
     }
+
+    public abstract boolean hasUser(T entry, User user);
 }

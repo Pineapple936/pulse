@@ -1,12 +1,15 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.User;
 import com.example.demo.entity.Workout;
 import com.example.demo.entity.dto.ResponseMessageDto;
 import com.example.demo.entity.dto.WorkoutDetailsDto;
 import com.example.demo.service.WorkoutService;
+import com.example.demo.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,44 +26,34 @@ public class WorkoutController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findWorkoutById(@PathVariable Long id) {
+    public ResponseEntity<?> findWorkoutById(@PathVariable Long id, @AuthenticationPrincipal User user) {
         Workout workout = workoutService.findById(id);
-        if(!isWorkoutForCurrentUser(workout))
-            return UnAuthorizedUser();
+        if(!workoutService.hasUser(workout, user))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseUtil.unauthorizedUser());
         return ResponseEntity.ok(workout);
     }
 
     @PostMapping
     public ResponseEntity<ResponseMessageDto> createWorkout(@RequestBody WorkoutDetailsDto dto) {
         workoutService.save(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseMessageDto("Workout created successfully"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseUtil.createdMessage());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseMessageDto> editWorkoutById(@PathVariable Long id, @RequestBody WorkoutDetailsDto dto) {
-        if(!isWorkoutForCurrentUser(id))
-            return UnAuthorizedUser();
+    public ResponseEntity<ResponseMessageDto> editWorkoutById(@PathVariable Long id,
+                                                              @RequestBody WorkoutDetailsDto dto,
+                                                              @AuthenticationPrincipal User user) {
+        if(!workoutService.hasUser(workoutService.findById(id), user))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseUtil.unauthorizedUser());
         workoutService.update(id, dto);
-        return ResponseEntity.ok(new ResponseMessageDto("Workout updated successfully"));
+        return ResponseEntity.ok(ResponseUtil.updatedMessage());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseMessageDto> deleteWorkoutById(@PathVariable Long id) {
-        if(!isWorkoutForCurrentUser(id))
-            return UnAuthorizedUser();
+    public ResponseEntity<ResponseMessageDto> deleteWorkoutById(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        if(!workoutService.hasUser(workoutService.findById(id), user))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseUtil.unauthorizedUser());
         workoutService.delete(id);
-        return ResponseEntity.ok(new ResponseMessageDto("Workout deleted successfully"));
-    }
-
-    private boolean isWorkoutForCurrentUser(Long id) {
-        return workoutService.hasCurrentUser(workoutService.findById(id));
-    }
-
-    private boolean isWorkoutForCurrentUser(Workout workout) {
-        return workoutService.hasCurrentUser(workout);
-    }
-
-    private ResponseEntity<ResponseMessageDto> UnAuthorizedUser() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseMessageDto("You are not authorized"));
+        return ResponseEntity.ok(ResponseUtil.deletedMessage());
     }
 }

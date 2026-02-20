@@ -18,12 +18,13 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService extends CrudService<User, UserRepository, Long> {
+public class UserService {
     private final JwtCore jwtCore;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository repository;
 
     public void save(RegisterDto dto) {
-        User user = super.save(new User(dto.name(), dto.email(), passwordEncoder.encode(dto.password())));
+        User user = repository.save(new User(dto.name(), dto.email(), passwordEncoder.encode(dto.password())));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), user.getPassword(), new HashSet<>()

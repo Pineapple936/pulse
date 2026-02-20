@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.dto.*;
 import com.example.demo.service.UserService;
+import com.example.demo.util.ResponseUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<ResponseMessageDto> register(@RequestBody RegisterDto dto) {
         userService.save(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseMessageDto("User registered successfully"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseUtil.registeredMessage());
     }
 
     @PostMapping("/login")
