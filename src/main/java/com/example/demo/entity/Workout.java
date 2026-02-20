@@ -6,19 +6,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "workout")
 @Data
+@NoArgsConstructor
 public class Workout {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-    private LocalDate date;
+    private LocalDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -28,7 +28,7 @@ public class Workout {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    public Workout(String name, LocalDate date, User user) {
+    public Workout(String name, LocalDateTime date, User user) {
         this.name = name;
         this.date = date;
         this.user = user;

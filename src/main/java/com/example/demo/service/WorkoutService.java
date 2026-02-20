@@ -18,15 +18,15 @@ public class WorkoutService extends CrudService<Workout, WorkoutRepository, Long
         return userService.getCurrentUser().getWorkouts();
     }
 
-    public Workout save(WorkoutDetailsDto dto) {
-        return super.save(new Workout(dto.name(), dto.date(), userService.getCurrentUser()));
+    public void save(WorkoutDetailsDto dto) {
+        super.save(new Workout(dto.name(), dto.date(), userService.getCurrentUser()));
     }
 
-    public Workout update(Long id, WorkoutDetailsDto dto) {
+    public void update(Long id, WorkoutDetailsDto dto) {
         Workout workout = findById(id);
         if(dto.name() != null && !dto.name().equals(workout.getName())) workout.setName(dto.name());
         if(dto.date() != null && !dto.date().equals(workout.getDate())) workout.setDate(dto.date());
-        return super.update(id, workout);
+        super.update(id, workout);
     }
 
     public boolean hasCurrentUser(Workout workout) {

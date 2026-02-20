@@ -1,10 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.User;
-import com.example.demo.entity.dto.JWTAuthentificationDto;
-import com.example.demo.entity.dto.LoginDto;
-import com.example.demo.entity.dto.RefreshTokenDto;
-import com.example.demo.entity.dto.RegisterDto;
+import com.example.demo.entity.dto.*;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtCore;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,15 +22,13 @@ public class UserService extends CrudService<User, UserRepository, Long> {
     private final JwtCore jwtCore;
     private final PasswordEncoder passwordEncoder;
 
-    public User save(RegisterDto dto) {
+    public void save(RegisterDto dto) {
         User user = super.save(new User(dto.name(), dto.email(), passwordEncoder.encode(dto.password())));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), user.getPassword(), new HashSet<>()
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return user;
     }
 
     public JWTAuthentificationDto singIn(LoginDto userCredentialsDto) throws AuthenticationException {
@@ -47,7 +42,7 @@ public class UserService extends CrudService<User, UserRepository, Long> {
             User user = findByEmail(jwtCore.getEmailFromToken(refreshToken));
             return jwtCore.createAuthToken(user.getEmail(), refreshToken);
         }
-        throw new  AuthenticationException("Invalid refresh token");
+        throw new AuthenticationException("Invalid refresh token");
     }
 
     public User getCurrentUser() {
