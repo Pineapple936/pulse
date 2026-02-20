@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,5 +18,6 @@ public class ExerciseType {
     private String name;
 
     @CreationTimestamp
+    @JsonIgnore
     private LocalDateTime createdAt;
 }

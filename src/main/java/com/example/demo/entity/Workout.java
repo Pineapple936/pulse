@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "workout")
@@ -24,6 +25,9 @@ public class Workout {
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
+
+    @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL)
+    private List<Exercise> exercises;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
