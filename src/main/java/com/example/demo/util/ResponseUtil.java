@@ -1,6 +1,6 @@
 package com.example.demo.util;
 
-import com.example.demo.entity.dto.ResponseMessageDto;
+import com.example.demo.entity.dto.response.ResponseMessageDto;
 
 public class ResponseUtil {
     public static ResponseMessageDto createdMessage() {

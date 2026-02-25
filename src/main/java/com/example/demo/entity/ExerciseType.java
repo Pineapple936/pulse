@@ -13,11 +13,14 @@ import java.time.LocalDateTime;
 public class ExerciseType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name", unique = true, nullable = false, length = 30)
     private String name;
 
     @CreationTimestamp
     @JsonIgnore
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

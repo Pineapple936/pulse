@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class Exercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @ManyToOne
@@ -27,6 +28,8 @@ public class Exercise {
     private ExerciseType exerciseType;
 
     @CreationTimestamp
+    @JsonIgnore
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public Exercise(Workout workout, ExerciseType exerciseType) {

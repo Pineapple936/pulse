@@ -1,7 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.User;
-import com.example.demo.entity.dto.*;
+import com.example.demo.entity.dto.auth.JWTAuthentificationDto;
+import com.example.demo.entity.dto.auth.LoginDto;
+import com.example.demo.entity.dto.auth.RefreshTokenDto;
+import com.example.demo.entity.dto.auth.RegisterDto;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtCore;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.AuthenticationException;
 import java.util.HashSet;
@@ -23,6 +27,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
 
+    @Transactional
     public void save(RegisterDto dto) {
         User user = repository.save(new User(dto.name(), dto.email(), passwordEncoder.encode(dto.password())));
 
@@ -37,7 +42,7 @@ public class UserService {
         return jwtCore.createAuthToken(user.getEmail());
     }
 
-    public JWTAuthentificationDto refreshToken(RefreshTokenDto refreshTokenDto) throws Exception {
+    public JWTAuthentificationDto refreshToken(RefreshTokenDto refreshTokenDto) throws AuthenticationException {
         String refreshToken = refreshTokenDto.refreshToken();
         if (refreshToken != null && jwtCore.validateJwtToken(refreshToken)) {
             User user = findByEmail(jwtCore.getEmailFromToken(refreshToken));
@@ -51,6 +56,7 @@ public class UserService {
         return findByEmail(email);
     }
 
+    @Transactional(readOnly = true)
     private User findByCredentials(LoginDto userCredentialsDto) throws AuthenticationException {
         Optional<User> optionalUser = repository.findByEmail(userCredentialsDto.email());
         if (optionalUser.isPresent()){
@@ -62,6 +68,7 @@ public class UserService {
         throw new AuthenticationException("Email or password is not correct");
     }
 
+    @Transactional(readOnly = true)
     private User findByEmail(String email) throws EntityNotFoundException {
         return repository.findByEmail(email).orElseThrow(
                 () -> new EntityNotFoundException("User with email " + email + " not found")

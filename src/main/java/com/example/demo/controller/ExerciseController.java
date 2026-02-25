@@ -3,10 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.entity.Workout;
 import com.example.demo.entity.dto.ExerciseDto;
-import com.example.demo.entity.dto.ResponseMessageDto;
+import com.example.demo.entity.dto.response.ResponseMessageDto;
 import com.example.demo.service.ExerciseService;
 import com.example.demo.service.WorkoutService;
 import com.example.demo.util.ResponseUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class ExerciseController {
 
     @PostMapping("/{workoutId}")
     public ResponseEntity<ResponseMessageDto> createExerciseInWorkout(@PathVariable Long workoutId,
-                                                                      @RequestBody ExerciseDto dto,
+                                                                      @Valid @RequestBody ExerciseDto dto,
                                                                       @AuthenticationPrincipal User user) {
         if(!workoutService.hasUser(workoutService.findById(workoutId), user))
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseUtil.unauthorizedUser());
@@ -41,7 +42,7 @@ public class ExerciseController {
 
     @PutMapping("/{exerciseId}")
     public ResponseEntity<ResponseMessageDto> editExerciseById(@PathVariable Long exerciseId,
-                                                               @RequestBody ExerciseDto dto,
+                                                               @Valid @RequestBody ExerciseDto dto,
                                                                @AuthenticationPrincipal User user) {
         if(!workoutService.hasUser(exerciseService.findById(exerciseId).getWorkout(), user))
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseUtil.unauthorizedUser());

@@ -16,9 +16,13 @@ import java.util.List;
 public class Workout {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name", nullable = false, length = 30)
     private String name;
+
+    @Column(name = "date", nullable = false)
     private LocalDateTime date;
 
     @ManyToOne
@@ -27,9 +31,12 @@ public class Workout {
     private User user;
 
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Exercise> exercises;
 
     @CreationTimestamp
+    @JsonIgnore
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public Workout(String name, LocalDateTime date, User user) {

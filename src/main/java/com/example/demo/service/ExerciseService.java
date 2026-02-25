@@ -9,6 +9,7 @@ import com.example.demo.repository.ExerciseTypeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class ExerciseService extends CrudService<Exercise, ExerciseRepository, L
         return workoutService.hasUser(exercise.getWorkout(), user);
     }
 
+    @Transactional(readOnly = true)
     private ExerciseType findExerciseTypeByName(String name) {
         return exerciseTypeRepository.findByNameIgnoreCase(name).orElseThrow(
                 () -> new EntityNotFoundException("Exercise with name " + name + " not found")

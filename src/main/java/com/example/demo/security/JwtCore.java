@@ -1,6 +1,6 @@
 package com.example.demo.security;
 
-import com.example.demo.entity.dto.JWTAuthentificationDto;
+import com.example.demo.entity.dto.auth.JWTAuthentificationDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
