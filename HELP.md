@@ -361,32 +361,51 @@
 
       ```json
       {
-        "exerciseId": 1,
-        "reps": 15,
-        "time": 30,
-        "date": "2026-02-20T10:00:00"
+          "repetitions": 123,
+          "sets": 2,
+          "weight": 44.0,
+          "id": 1
       }
       ```
+
+* **GET /api/progress/exercise/{exerciseId}**
+
+    * **Описание**: Получение списка всех прогрессов для конкретного упражнения по его ID.
+    * **Параметр в URL**: `{exerciseId}` — ID упражнения.
+    * **Ответ**:
+
+      ```json
+        [
+          {
+              "repetitions": 123,
+              "sets": 2,
+              "weight": 44.0,
+              "id": 1
+          }
+        ]
+      ```
+
 
 * **POST /api/progress**
 
     * Описание: Добавление прогресса для упражнения.
-    * Тело запроса:
+  * Тело запроса:
 
-      ```json
-      {
+    ```json
+    {
         "exerciseId": 1,
-        "reps": 20,
-        "time": 25
-      }
-      ```
-    * Ответ:
+        "repetitions": 123,
+        "sets": 2,
+        "weight": 44
+    }
+    ```
+  * Ответ:
 
-      ```json
-      {
-        "message": "Progress added successfully"
-      }
-      ```
+    ```json
+    {
+      "message": "Created successfully"
+    }
+    ```
 
 * **PUT /api/progress/{progressId}**
 
@@ -396,15 +415,16 @@
 
       ```json
       {
-        "reps": 25,
-        "time": 28
+        "repetitions": 123,
+        "sets": 2,
+        "weight": 44
       }
       ```
     * Ответ:
 
       ```json
       {
-        "message": "Progress updated successfully"
+        "message": "Updated successfully"
       }
       ```
 
@@ -416,7 +436,7 @@
 
       ```json
       {
-        "message": "Progress deleted successfully"
+        "message": "Deleted successfully"
       }
       ```
 
