@@ -386,26 +386,26 @@
       ```
 
 
-* **POST /api/progress**
+* **POST /api/progress/{exerciseId}**
 
     * Описание: Добавление прогресса для упражнения.
+  * **Параметр в URL**: `{exerciseId}` — ID упражнения.
   * Тело запроса:
 
-    ```json
-    {
-        "exerciseId": 1,
-        "repetitions": 123,
-        "sets": 2,
-        "weight": 44
-    }
-    ```
+  ```json
+  {
+      "repetitions": 123,
+      "sets": 2,
+      "weight": 44
+  }
+  ```
   * Ответ:
 
-    ```json
-    {
-      "message": "Created successfully"
-    }
-    ```
+  ```json
+  {
+    "message": "Created successfully"
+  }
+  ```
 
 * **PUT /api/progress/{progressId}**
 

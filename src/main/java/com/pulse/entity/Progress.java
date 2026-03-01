@@ -1,6 +1,7 @@
 package com.pulse.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pulse.entity.dto.ProgressDetailsDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,10 +38,10 @@ public class Progress {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Progress(int repetitions, int sets, float weight, Exercise exercise) {
-        this.repetitions = repetitions;
-        this.sets = sets;
-        this.weight = weight;
+    public Progress(Exercise exercise, ProgressDetailsDto dto) {
+        this.repetitions = dto.repetitions();
+        this.sets = dto.sets();
+        this.weight = dto.weight();
         this.exercise = exercise;
     }
 }

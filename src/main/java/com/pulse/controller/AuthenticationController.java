@@ -32,7 +32,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<JWTAuthentificationDto> login(@Valid @RequestBody LoginDto dto) throws AuthenticationException {
-        JWTAuthentificationDto jwtAuthenticationDto = userService.singIn(dto);
+        JWTAuthentificationDto jwtAuthenticationDto = userService.signIn(dto);
         return ResponseEntity.ok(jwtAuthenticationDto);
     }
 

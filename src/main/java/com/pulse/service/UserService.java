@@ -37,9 +37,17 @@ public class UserService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    public JWTAuthentificationDto singIn(LoginDto userCredentialsDto) throws AuthenticationException {
+    public JWTAuthentificationDto signIn(LoginDto userCredentialsDto) throws AuthenticationException {
         User user = findByCredentials(userCredentialsDto);
         return jwtCore.createAuthToken(user.getEmail());
+    }
+
+    /**
+     * @deprecated Use {@link #signIn(LoginDto)}.
+     */
+    @Deprecated(forRemoval = false)
+    public JWTAuthentificationDto singIn(LoginDto userCredentialsDto) throws AuthenticationException {
+        return signIn(userCredentialsDto);
     }
 
     public JWTAuthentificationDto refreshToken(RefreshTokenDto refreshTokenDto) throws AuthenticationException {

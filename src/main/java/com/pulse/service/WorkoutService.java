@@ -6,31 +6,34 @@ import com.pulse.entity.dto.WorkoutDetailsDto;
 import com.pulse.repository.WorkoutRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class WorkoutService extends CrudService<Workout, WorkoutRepository, Long> {
-    private final UserService userService;
 
-    public List<Workout> getAllWorkoutsByUser() {
-        return userService.getCurrentUser().getWorkouts();
+    @Transactional
+    public List<Workout> getAllWorkoutsByUser(Long userId) {
+        return repository.findAllByUserId(userId);
     }
 
-    public void save(WorkoutDetailsDto dto) {
-        super.save(new Workout(dto.name(), dto.date(), userService.getCurrentUser()));
+    public void save(WorkoutDetailsDto dto, User user) {
+        super.save(new Workout(user, dto));
     }
 
+    @Transactional
     public void update(Long id, WorkoutDetailsDto dto) {
         Workout workout = findById(id);
-        if(!dto.name().equals(workout.getName())) workout.setName(dto.name());
-        if(!dto.date().equals(workout.getDate())) workout.setDate(dto.date());
+        if(dto.name() != null && !dto.name().equals(workout.getName())) workout.setName(dto.name());
+        if(dto.date() != null && !dto.date().equals(workout.getDate())) workout.setDate(dto.date());
         super.update(id, workout);
     }
 
     @Override
-    public boolean hasUser(Workout entry, User user) {
-        return user.getId().equals(entry.getUser().getId());
+    @Transactional(readOnly = true)
+    public boolean hasUser(Long id, Long userId) {
+        return repository.existsByIdAndUserId(id, userId);
     }
 }

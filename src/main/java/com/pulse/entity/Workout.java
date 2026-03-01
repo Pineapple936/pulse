@@ -1,6 +1,7 @@
 package com.pulse.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pulse.entity.dto.WorkoutDetailsDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,9 +40,12 @@ public class Workout {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Workout(String name, LocalDateTime date, User user) {
-        this.name = name;
-        this.date = date;
+    public Workout(User user, WorkoutDetailsDto dto) {
+        if(dto.name() == null || dto.name().isBlank()) throw new IllegalArgumentException("Name cannot be empty or blank");
+        if(dto.date() == null) throw new IllegalArgumentException("Date cannot be null");
+
+        this.name = dto.name();
+        this.date = dto.date();
         this.user = user;
     }
 }

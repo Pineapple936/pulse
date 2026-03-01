@@ -1,6 +1,5 @@
 package com.pulse.service;
 
-import com.pulse.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,5 +42,5 @@ public abstract class CrudService<T, R extends JpaRepository<T, ID>, ID> {
         repository.deleteById(id);
     }
 
-    public abstract boolean hasUser(T entry, User user);
+    public abstract boolean hasUser(Long id, Long userId);
 }
