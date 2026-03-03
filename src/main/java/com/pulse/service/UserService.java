@@ -41,6 +41,7 @@ public class UserService {
         log.info("User registered and authenticated email={}", user.getEmail());
     }
 
+    @Transactional(readOnly = true)
     public JWTAuthentificationDto signIn(LoginDto userCredentialsDto) throws AuthenticationException {
         log.info("Sign-in requested for email={}", userCredentialsDto.email());
         User user = findByCredentials(userCredentialsDto);
@@ -48,11 +49,12 @@ public class UserService {
         return jwtCore.createAuthToken(user.getEmail());
     }
 
-    @Deprecated(forRemoval = false)
+    @Transactional(readOnly = true)
     public JWTAuthentificationDto singIn(LoginDto userCredentialsDto) throws AuthenticationException {
         return signIn(userCredentialsDto);
     }
 
+    @Transactional(readOnly = true)
     public JWTAuthentificationDto refreshToken(RefreshTokenDto refreshTokenDto) throws AuthenticationException {
         String refreshToken = refreshTokenDto.refreshToken();
         if (refreshToken != null && jwtCore.validateJwtToken(refreshToken)) {
@@ -64,13 +66,13 @@ public class UserService {
         throw new AuthenticationException("Invalid refresh token");
     }
 
+    @Transactional(readOnly = true)
     public User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Resolving current user for email={}", email);
         return findByEmail(email);
     }
 
-    @Transactional(readOnly = true)
     private User findByCredentials(LoginDto userCredentialsDto) throws AuthenticationException {
         Optional<User> optionalUser = repository.findByEmail(userCredentialsDto.email());
         if (optionalUser.isPresent()){
@@ -83,7 +85,6 @@ public class UserService {
         throw new AuthenticationException("Email or password is not correct");
     }
 
-    @Transactional(readOnly = true)
     private User findByEmail(String email) throws EntityNotFoundException {
         log.debug("Finding user by email={}", email);
         return repository.findByEmail(email).orElseThrow(

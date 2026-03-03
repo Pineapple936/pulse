@@ -82,12 +82,7 @@ class ExerciseServiceTest {
     void hasUser_forwardedToRepo() {
         when(repository.existsByIdAndWorkoutUserId(2L, 3L)).thenReturn(true);
         assertTrue(service.hasUser(2L, 3L));
-    }
-
-    @Test
-    void hasWorkoutUser_forwardedToRepo() {
-        when(repository.existsByWorkoutIdAndWorkoutUserId(5L, 6L)).thenReturn(true);
-        assertTrue(service.hasWorkoutUser(5L, 6L));
+        verify(repository).existsByIdAndWorkoutUserId(2L, 3L);
     }
 
     @Test

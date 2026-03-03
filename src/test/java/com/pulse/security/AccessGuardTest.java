@@ -48,13 +48,19 @@ class AccessGuardTest {
     }
 
     @Test
-    void hasExerciseWorkoutAccess_shouldDelegateToExerciseService() {
+    void hasExerciseWorkoutAccess_shouldDelegateToWorkoutService() {
         User user = new User();
         user.setId(2L);
-        when(exerciseService.hasWorkoutUser(11L, 2L)).thenReturn(true);
+        when(workoutService.hasUser(11L, 2L)).thenReturn(true);
 
         assertTrue(accessGuard.hasExerciseWorkoutAccess(11L, user));
-        verify(exerciseService).hasWorkoutUser(11L, 2L);
+        verify(workoutService).hasUser(11L, 2L);
+    }
+
+    @Test
+    void hasExerciseWorkoutAccess_nullUser_shouldReturnFalse() {
+        assertFalse(accessGuard.hasExerciseWorkoutAccess(11L, null));
+        verifyNoInteractions(workoutService);
     }
 
     @Test

@@ -37,7 +37,6 @@ public class JwtFilter extends OncePerRequestFilter {
         } else if (token != null) {
             log.warn("JWT validation failed for method={} uri={}", request.getMethod(), request.getRequestURI());
         }
-
         filterChain.doFilter(request, response);
     }
 

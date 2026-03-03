@@ -16,12 +16,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WorkoutService extends CrudService<Workout, WorkoutRepository, Long> {
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Workout> getAllWorkoutsByUser(Long userId) {
         log.debug("Find all workouts by userId={}", userId);
         return repository.findAllByUserId(userId);
     }
 
+    @Transactional
     public void save(WorkoutDetailsDto dto, User user) {
         log.info("Saving workout for userId={}", user.getId());
         super.save(new Workout(user, dto));

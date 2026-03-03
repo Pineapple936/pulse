@@ -1,12 +1,14 @@
 package com.pulse.controller;
 
 import com.pulse.entity.dto.ProgressDetailsDto;
+import com.pulse.entity.dto.ProgressUpdateDto;
 import com.pulse.entity.Progress;
 import com.pulse.entity.User;
 import com.pulse.entity.dto.response.ResponseMessageDto;
 import com.pulse.service.ExerciseService;
 import com.pulse.service.ProgressService;
 import com.pulse.util.ResponseUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,7 +46,7 @@ public class ProgressController {
 
     @PostMapping("/{exerciseId}")
     @PreAuthorize("@accessGuard.hasExerciseProgressAccess(#exerciseId, #user)")
-    public ResponseEntity<ResponseMessageDto> createProgress(@RequestBody ProgressDetailsDto dto,
+    public ResponseEntity<ResponseMessageDto> createProgress(@Valid @RequestBody ProgressDetailsDto dto,
                                                              @AuthenticationPrincipal User user,
                                                              @PathVariable Long exerciseId) {
         log.info("Create progress for exerciseId={} userId={}", exerciseId, user.getId());
@@ -54,7 +56,7 @@ public class ProgressController {
 
     @PutMapping("/{progressId}")
     @PreAuthorize("@accessGuard.hasProgressAccess(#progressId, #user)")
-    public ResponseEntity<ResponseMessageDto> editProgressById(@RequestBody ProgressDetailsDto dto,
+    public ResponseEntity<ResponseMessageDto> editProgressById(@Valid @RequestBody ProgressUpdateDto dto,
                                                                @AuthenticationPrincipal User user,
                                                                @PathVariable Long progressId) {
         log.info("Update progressId={} userId={}", progressId, user.getId());

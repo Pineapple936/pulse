@@ -24,7 +24,7 @@ public class AccessGuard {
     }
 
     public boolean hasExerciseWorkoutAccess(Long workoutId, User user) {
-        boolean allowed = user != null && exerciseService.hasWorkoutUser(workoutId, user.getId());
+        boolean allowed = user != null && workoutService.hasUser(workoutId, user.getId());
         log.debug("Exercise-workout access check workoutId={} userId={} allowed={}",
                 workoutId, user != null ? user.getId() : null, allowed);
         return allowed;

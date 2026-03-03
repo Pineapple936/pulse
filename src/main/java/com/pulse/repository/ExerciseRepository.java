@@ -8,8 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
-    boolean existsByWorkoutIdAndWorkoutUserId(Long workoutId, Long userId);
-
     boolean existsByIdAndWorkoutUserId(Long exerciseId, Long userId);
 
     @Query("SELECT e FROM Exercise e WHERE e.workout.id = :workoutId")
