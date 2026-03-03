@@ -48,7 +48,7 @@ class ExerciseControllerTest {
 
         when(exerciseService.findExercisesByWorkoutId(workoutId)).thenReturn(exercises);
 
-        ResponseEntity<?> resp = controller.findAllExercisesByWorkout(workoutId, user);
+        ResponseEntity<List<Exercise>> resp = controller.findAllExercisesByWorkout(workoutId, user);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertSame(exercises, resp.getBody());
         verify(exerciseService).findExercisesByWorkoutId(workoutId);

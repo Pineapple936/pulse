@@ -2,6 +2,7 @@ package com.pulse.config;
 
 import com.pulse.security.JwtFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,17 +18,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@Slf4j
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     @Bean
     PasswordEncoder passwordEncoder() {
+        log.info("Initializing BCrypt password encoder");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) {
+        log.info("Building stateless security filter chain");
         http
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)

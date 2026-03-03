@@ -52,7 +52,7 @@ class WorkoutControllerTest {
         Workout workout = new Workout();
         when(workoutService.findById(id)).thenReturn(workout);
 
-        ResponseEntity<?> resp = controller.findWorkoutById(id, user);
+        ResponseEntity<Workout> resp = controller.findWorkoutById(id, user);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertSame(workout, resp.getBody());
     }

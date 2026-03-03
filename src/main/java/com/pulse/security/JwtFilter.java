@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtCore jwtCore;
@@ -28,8 +30,12 @@ public class JwtFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromHeader(request);
 
+        log.debug("JWT filter request method={} uri={} tokenPresent={}",
+                request.getMethod(), request.getRequestURI(), token != null);
         if(token != null && jwtCore.validateJwtToken(token)) {
             setCustomUserDetailsToSecurityContextHolder(token);
+        } else if (token != null) {
+            log.warn("JWT validation failed for method={} uri={}", request.getMethod(), request.getRequestURI());
         }
 
         filterChain.doFilter(request, response);
@@ -42,6 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 user, null, user.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.debug("Security context updated for email={}", email);
     }
 
     private String getTokenFromHeader(HttpServletRequest request) {

@@ -1,5 +1,6 @@
 package com.pulse.controller;
 
+import com.pulse.entity.User;
 import com.pulse.entity.dto.auth.JWTAuthentificationDto;
 import com.pulse.entity.dto.auth.LoginDto;
 import com.pulse.entity.dto.auth.RefreshTokenDto;
@@ -62,10 +63,12 @@ class AuthenticationControllerTest {
     @Test
     void refreshToken_shouldReturnNewToken() throws Exception {
         RefreshTokenDto dto = new RefreshTokenDto("refresh");
+        User user = new User();
+        user.setEmail("john@example.com");
         JWTAuthentificationDto token = new JWTAuthentificationDto("acc", "ref");
         when(userService.refreshToken(dto)).thenReturn(token);
 
-        ResponseEntity<JWTAuthentificationDto> resp = controller.refreshToken(dto);
+        ResponseEntity<JWTAuthentificationDto> resp = controller.refreshToken(dto, user);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertSame(token, resp.getBody());
     }
@@ -73,7 +76,9 @@ class AuthenticationControllerTest {
     @Test
     void refreshToken_shouldPropagateException() throws Exception {
         RefreshTokenDto dto = new RefreshTokenDto("refresh");
+        User user = new User();
+        user.setEmail("john@example.com");
         when(userService.refreshToken(dto)).thenThrow(new javax.naming.AuthenticationException("oops"));
-        assertThrows(javax.naming.AuthenticationException.class, () -> controller.refreshToken(dto));
+        assertThrows(javax.naming.AuthenticationException.class, () -> controller.refreshToken(dto, user));
     }
 }

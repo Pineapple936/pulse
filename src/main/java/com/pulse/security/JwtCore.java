@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtCore {
     private final String secret;
     private final int authLifetime, refreshLifetime;
@@ -27,14 +29,17 @@ public class JwtCore {
     }
 
     public JWTAuthentificationDto createAuthToken(String email) {
+        log.debug("Creating access+refresh token for email={}", email);
         return new JWTAuthentificationDto(generateAuthToken(email), generateRefreshToken(email));
     }
 
     public JWTAuthentificationDto createAuthToken(String email, String refreshToken) {
+        log.debug("Creating access token with existing refresh token for email={}", email);
         return new JWTAuthentificationDto(generateAuthToken(email), refreshToken);
     }
 
     public String getEmailFromToken(String token) {
+        log.debug("Extracting email from JWT");
         Claims claims = Jwts
                 .parser()
                 .verifyWith(getSignKey())
@@ -52,8 +57,10 @@ public class JwtCore {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+            log.debug("JWT token validation success");
             return true;
         } catch(Exception e) {
+            log.warn("JWT token validation failed: {}", e.getMessage());
             return false;
         }
     }

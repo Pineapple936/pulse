@@ -2,6 +2,7 @@ package com.pulse.controller;
 
 import com.pulse.entity.dto.response.ErrorResponseDto;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,9 +16,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponseDto> authentificationExceptionHandler(Exception e) {
+        log.warn("Authentication error: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponseDto(
                 "Unauthorized",
                 e.getMessage(),
@@ -27,6 +30,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> notFoundExceptionHandler(Exception e) {
+        log.warn("Entity not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto(
                 "Entity not found",
                 e.getMessage(),
@@ -43,6 +47,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toList());
 
         String message = String.join(", ", errorMessages);
+        log.warn("Validation failed: {}", message);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto(
                 "Validation failed",
@@ -57,6 +62,7 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException.class
     })
     public ResponseEntity<ErrorResponseDto> argumentExceptionHandler(Exception e) {
+        log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto(
                 "Bad request",
                 e.getMessage(),
@@ -66,6 +72,7 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> exceptionHandler(Exception e) {
+        log.error("Unhandled exception", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDto(
                 "Internal server error",
                 e.getMessage(),

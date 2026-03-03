@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -44,7 +45,7 @@ class ProgressControllerTest {
         Long id = 4L;
         Progress prog = new Progress();
         when(progressService.findById(id)).thenReturn(prog);
-        ResponseEntity<?> resp = controller.findProgressById(user, id);
+        ResponseEntity<Progress> resp = controller.findProgressById(user, id);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertSame(prog, resp.getBody());
     }
@@ -53,7 +54,7 @@ class ProgressControllerTest {
     void findAllProgressByExerciseId_authorized() {
         Long exId = 3L;
         when(progressService.findAllByExerciseId(exId)).thenReturn(Collections.singletonList(new Progress()));
-        ResponseEntity<?> resp = controller.findAllProgressByExerciseId(exId, user);
+        ResponseEntity<List<Progress>> resp = controller.findAllProgressByExerciseId(exId, user);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
 
