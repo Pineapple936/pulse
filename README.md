@@ -26,11 +26,16 @@ A comprehensive fitness tracking platform built with **Spring Boot** that helps 
 | **Validation**     | Spring Validation                                              |
 | **Language**       | Java 21                                                        |
 | **Build Tool**     | Maven                                                          |
+| **Containerization** | Docker, Docker Compose                                       |
 | **Utils**          | Lombok                                                         |
 
 ## Getting Started
 
 ### Prerequisites
+
+- Java 21
+- Maven 3.9+
+- Docker + Docker Compose (for containerized run)
 
 ### Installation
 
@@ -41,18 +46,51 @@ A comprehensive fitness tracking platform built with **Spring Boot** that helps 
    cd pulse
    ```
 
-2. **Build the project**
+2. **`.env` configuration**
+
+   ```env
+   DB_NAME=training
+   DB_USER=postgres
+   DB_PASSWORD=postgres
+   ```
+
+   `.env` is included in this repository and is committed with the project.
+
+3. **Build the project**
 
    ```bash
    ./mvnw clean install
    ```
 
-3. **Run the application**
+4. **Run the application (local)**
    ```bash
    ./mvnw spring-boot:run
    ```
 
 The application will be available at `http://localhost:8080`
+
+### Run with Docker
+
+1. **Use existing `.env` from the repository** (see values above).
+2. **Build and start services**
+
+   ```bash
+   docker compose up --build -d
+   ```
+
+3. **Check logs**
+
+   ```bash
+   docker compose logs -f backend
+   ```
+
+4. **Stop services**
+
+   ```bash
+   docker compose down
+   ```
+
+Backend is available at `http://localhost:8080`, PostgreSQL runs in the `db` container with data persisted in Docker volume `db_data`.
 
 ---
 
