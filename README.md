@@ -1,137 +1,212 @@
 # 💪 Pulse
 
-> Track workouts. Log progress. Achieve goals.
-
-A comprehensive fitness tracking platform built with **Spring Boot** that helps you monitor your daily workouts, track exercise performance, and visualize your fitness progress over time.
+Бэкенд-приложение для отслеживания фитнеса на **Spring Boot**: учёт тренировок, упражнений и прогресса по подходам с JWT-аутентификацией и разграничением доступа к данным по пользователю.
 
 ---
 
-## ✨ Features
+## ✨ Возможности
 
-- 🏋️ **Workout Tracking** – Log and manage your training sessions
-- 📚 **Exercise Database** – Comprehensive library of exercises with detailed information
-- 📊 **Progress Monitoring** – Track your performance metrics over time
-- 🔐 **User Authentication** – Secure JWT-based authentication system
-- 👤 **User Profiles** – Personalized workout and progress management
+- 🏋️ **Тренировки** — создание, просмотр, редактирование и удаление тренировок
+- 💪 **Упражнения** — упражнения внутри тренировки со ссылкой на справочник типов
+- 📊 **Прогресс** — подходы (повторения, число сетов, вес) по каждому упражнению
+- 🔐 **Аутентификация** — регистрация с моментальной выдачей токенов, вход и обновление токена (JWT)
+- 👤 **Профиль** — пол, возраст, вес, рост; удаление аккаунта
+- 🛡️ **Изоляция данных** — пользователь видит и меняет только свои ресурсы
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Технологии
 
-| Layer              | Technology                                                     |
-| ------------------ |----------------------------------------------------------------|
-| **Backend**        | Spring Boot 4.0.2, Spring Security, Spring Data JPA, Spring MVC |
-| **Database**       | PostgreSQL, Hibernate, JPA                                     |
-| **Authentication** | JWT (JJWT 0.12.6)                                              |
-| **Validation**     | Spring Validation                                              |
-| **Language**       | Java 21                                                        |
-| **Build Tool**     | Maven                                                          |
-| **Containerization** | Docker, Docker Compose                                       |
-| **Utils**          | Lombok                                                         |
+| Слой | Технологии |
+| --- | --- |
+| **Язык** | Java 21 |
+| **Фреймворк** | Spring Boot 4.0.2 (Web MVC, Security, Validation) |
+| **Доступ к БД** | jOOQ 3.19 (типобезопасный SQL + кодогенерация) |
+| **Миграции** | Liquibase |
+| **База данных** | PostgreSQL 17 |
+| **Аутентификация** | JWT (JJWT 0.12.6) |
+| **Маппинг DTO** | MapStruct 1.6 |
+| **Сборка** | Maven (Maven Wrapper `./mvnw`) |
+| **Контейнеризация** | Docker, Docker Compose |
+| **Тесты** | JUnit 5, Mockito, AssertJ, JaCoCo |
+| **Утилиты** | Lombok |
 
-## Getting Started
+> ⚠️ Проект использует **jOOQ**, а не JPA/Hibernate. Классы `*Record` (`UserRecord`, `WorkoutRecord` и т.д.) **генерируются** из схемы БД в `target/generated-sources/jooq` во время сборки.
 
-### Prerequisites
+---
+
+## 🚀 Быстрый старт
+
+### Требования
 
 - Java 21
-- Maven 3.9+
-- Docker + Docker Compose (for containerized run)
+- Docker + Docker Compose
+- Запущенная PostgreSQL **обязательна на этапе сборки** — jOOQ читает из неё схему для кодогенерации.
 
-### Installation
+### Настройка `.env`
 
-1. **Clone the repository**
+Создай в корне проекта файл `.env` с параметрами БД и секретом для JWT:
 
+```env
+POSTGRES_DB=pulse
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+JWT_SECRET=<base64-секрет для подписи HS256, минимум 256 бит>
+```
+
+Эти переменные использует и Docker Compose, и Maven-плагин кодогенерации jOOQ, и само приложение (`application.properties`).
+
+> 🔐 **Не коммить `.env` в git** — в нём пароль БД и ключ подписи токенов. Добавь `.env` в `.gitignore`, а в репозитории держи шаблон `.env.example` с ключами без реальных значений. Если секреты уже попадали в историю, для боевого окружения их следует сменить.
+
+### Вариант 1. Полный запуск в Docker
+
+```bash
+docker compose up --build -d      # поднимет backend + PostgreSQL
+docker compose logs -f backend    # логи
+docker compose down               # остановить
+```
+
+Приложение: `http://localhost:8080`. Данные PostgreSQL сохраняются в volume `pgdata`.
+
+### Вариант 2. Локальный запуск
+
+1. Поднять только БД:
    ```bash
-   git clone <repository-url>
-   cd pulse
+   docker compose up -d db
    ```
-
-2. **`.env` configuration**
-
-   ```env
-   DB_NAME=training
-   DB_USER=postgres
-   DB_PASSWORD=postgres
-   ```
-
-   `.env` is included in this repository and is committed with the project.
-
-3. **Build the project**
-
+2. Экспортировать переменные окружения из `.env` (нужны для кодогенерации jOOQ):
    ```bash
-   ./mvnw clean install
+   export $(grep -v '^#' .env | xargs)
    ```
-
-4. **Run the application (local)**
+3. Собрать и запустить:
    ```bash
    ./mvnw spring-boot:run
    ```
 
-The application will be available at `http://localhost:8080`
-
-### Run with Docker
-
-1. **Use existing `.env` from the repository** (see values above).
-2. **Build and start services**
-
-   ```bash
-   docker compose up --build -d
-   ```
-
-3. **Check logs**
-
-   ```bash
-   docker compose logs -f backend
-   ```
-
-4. **Stop services**
-
-   ```bash
-   docker compose down
-   ```
-
-Backend is available at `http://localhost:8080`, PostgreSQL runs in the `db` container with data persisted in Docker volume `db_data`.
+> Для датасорса приложения заданы значения по умолчанию (`pulse` / `admin` / `admin`), поэтому запуск из IntelliJ работает без ручного экспорта переменных. А вот **кодогенерация jOOQ** (фаза `generate-sources` в Maven) переменные окружения требует.
 
 ---
 
-## 📁 Project Structure
+## 🧪 Тесты
+
+```bash
+export $(grep -v '^#' .env | xargs)   # переменные нужны кодогенерации при сборке
+./mvnw test
+```
+
+Запущенная PostgreSQL обязательна: часть тестов — интеграционные.
+
+Структура тестов:
+
+| Тип | Что покрывает |
+| --- | --- |
+| **Unit (Mockito)** | сервисы: `Auth`, `User`, `Workout`, `Exercise`, `Progress`, `AccessRepositoryRegistry`, `JwtCore`, `JwtFilter` |
+| **Контроллеры (MockMvc)** | все эндпоинты, каждый код ответа: `200/201/204/400/401/403/404` |
+| **Репозитории (`@JooqTest`)** | реальный PostgreSQL, транзакция откатывается после каждого теста |
+| **Security (`@SpringBootTest`)** | полная цепочка фильтров безопасности |
+
+Отчёт о покрытии (JaCoCo) формируется в фазе `test`:
+
+```bash
+open target/site/jacoco/index.html
+```
+
+Сгенерированный код (jOOQ, MapStruct) из отчёта исключён.
+
+---
+
+## 🔌 API
+
+Базовый префикс — `/api`. Тело запросов и ответов — JSON.
+Все эндпоинты, кроме `POST /api/auth/register` и `POST /api/auth/login`, требуют заголовок `Authorization: Bearer <access-token>`.
+
+### Аутентификация — `/api/auth`
+
+| Метод | Путь | Описание | Успех |
+| --- | --- | --- | --- |
+| POST | `/register` | Регистрация + моментальная выдача токенов | `201` |
+| POST | `/login` | Вход по email и паролю | `200` |
+| POST | `/refresh` | Обновление access-токена по refresh-токену | `200` |
+
+### Пользователь — `/api/user`
+
+| Метод | Путь | Описание | Успех |
+| --- | --- | --- | --- |
+| DELETE | `/` | Удалить текущий аккаунт | `204` |
+
+### Тренировки — `/api/workouts`
+
+| Метод | Путь | Описание | Успех |
+| --- | --- | --- | --- |
+| POST | `/` | Создать тренировку | `201` |
+| GET | `/` | Список тренировок (`?page=&size=`) | `200` |
+| GET | `/{id}` | Тренировка по id | `200` |
+| PUT | `/` | Обновить тренировку | `200` |
+| DELETE | `/{id}` | Удалить тренировку | `204` |
+
+### Упражнения — `/api/exercises`
+
+| Метод | Путь | Описание | Успех |
+| --- | --- | --- | --- |
+| POST | `/` | Добавить упражнение в тренировку | `201` |
+| GET | `/{exerciseId}` | Упражнение по id | `200` |
+| GET | `/workout/{workoutId}` | Упражнения тренировки (`?page=&size=`) | `200` |
+| PUT | `/` | Обновить упражнение | `200` |
+| DELETE | `/{exerciseId}` | Удалить упражнение | `204` |
+
+### Прогресс — `/api/progress`
+
+| Метод | Путь | Описание | Успех |
+| --- | --- | --- | --- |
+| POST | `/` | Добавить подход | `201` |
+| GET | `/{id}` | Подход по id | `200` |
+| GET | `/exercise/{exerciseId}` | Подходы упражнения (`?page=&size=`) | `200` |
+| PUT | `/` | Обновить подход | `200` |
+| DELETE | `/{progressId}` | Удалить подход | `204` |
+
+### Коды ошибок
+
+Обрабатываются централизованно в `GlobalExceptionHandler`:
+
+| Код | Когда |
+| --- | --- |
+| `400` | Ошибка валидации / некорректный запрос |
+| `401` | Неверные учётные данные или невалидный refresh-токен |
+| `403` | Нет доступа к ресурсу (чужой ресурс или отсутствует токен) |
+| `404` | Ресурс не найден |
+| `500` | Непредвиденная ошибка |
+
+---
+
+## 🗄️ Модель данных
+
+Схема управляется Liquibase (`src/main/resources/db/changelog`):
+
+- **user** — пользователь (имя, пол, возраст, вес, рост, email, пароль)
+- **workout** — тренировка (принадлежит пользователю)
+- **exercise_type** — справочник типов упражнений
+- **exercise** — упражнение в тренировке (ссылается на тип)
+- **progress** — подход упражнения (сет, повторения, вес)
+
+Связи каскадные: удаление пользователя удаляет его тренировки → упражнения → прогресс.
+
+---
+
+## 📁 Структура проекта
 
 ```
 pulse/
-├── src/main/java/com/example/pulse/
-│   ├── config/              # Security & application configuration
-│   ├── controller/          # REST API endpoints
-│   ├── entity/              # JPA entities & DTOs
-│   ├── repository/          # Data access layer
-│   ├── security/            # JWT authentication & filters
-│   ├── service/             # Business logic
-│   └── util/                # Utility classes
-├── src/resources/
-│   └── application.properties
-├── README.md                # This file
-└── HELP.md                  # Additional documentation & help
+├── src/main/java/com/pulse/
+│   ├── config/          # SecurityConfig (JWT, stateless)
+│   ├── controller/      # REST-контроллеры, DTO (request/response), MapStruct-мапперы, обработчик ошибок
+│   ├── repository/      # доступ к данным через jOOQ DSLContext
+│   ├── service/         # бизнес-логика: auth, user, workout, exercise, progress, security, access
+│   └── PulseApplication.java
+├── src/main/resources/
+│   ├── application.properties
+│   └── db/changelog/    # миграции Liquibase
+├── src/test/java/com/pulse/   # unit-, MockMvc- и @JooqTest-тесты
+├── docker-compose.yml
+├── .env
+└── pom.xml
 ```
-
----
-
-## 📖 Documentation
-
-- **[README.md](README.md)** – Project overview and quick start guide
-- **[HELP.md](HELP.md)** – Detailed setup instructions and troubleshooting
-
----
-
-## 🔌 API Endpoints
-
-The application provides REST endpoints for:
-
-- 🔑 **Authentication** – Login and user registration
-- 🏋️ **Workouts** – Create, read, update, and delete workouts
-- 💪 **Exercises** – Browse and manage exercise database
-- 📈 **Progress** – Track and analyze fitness progress
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to fork this project and submit pull requests for any improvements.
