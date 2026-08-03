@@ -143,6 +143,11 @@ open target/site/jacoco/index.html
 Базовый префикс — `/api`. Тело запросов и ответов — JSON.
 Все эндпоинты, кроме `POST /api/auth/register` и `POST /api/auth/login`, требуют заголовок `Authorization: Bearer <access-token>`.
 
+### Swagger UI
+
+Интерактивная документация (springdoc-openapi): `http://localhost:8080/swagger-ui/index.html`, JSON-спека — `http://localhost:8080/v3/api-docs`.
+Кнопка **Authorize** принимает access-токен (без префикса `Bearer`, он подставляется автоматически).
+
 ### Аутентификация — `/api/auth`
 
 | Метод | Путь | Описание | Успех |
