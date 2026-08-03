@@ -1,10 +1,31 @@
-spring.application.name=pulse
+spring:
+  application:
+    name: pulse
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB:pulse}
+    username: ${POSTGRES_USER:admin}
+    password: ${POSTGRES_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
 
-jwt.secret=${JWT_SECRET:211e4129e577d9ea9dd8121745a497c6e62d4416f8186cfe7179cf29b4cb2fe3}
-jwt.access-token-expiration-minutes=15
-jwt.refresh-token-expiration-days=30
+jwt:
+  secret: ${JWT_SECRET:211e4129e577d9ea9dd8121745a497c6e62d4416f8186cfe7179cf29b4cb2fe3}
+  access-token-expiration-minutes: 15
+  refresh-token-expiration-days: 30
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/${POSTGRES_DB:pulse}
-spring.datasource.username=${POSTGRES_USER:admin}
-spring.datasource.password=${POSTGRES_PASSWORD:admin}
-spring.datasource.driver-class-name=org.postgresql.Driver
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/metrics
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/logs

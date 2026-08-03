@@ -8,8 +8,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-lgtm:4318
     depends_on:
       - db
+      - grafana-lgtm
   db:
     image: postgres:17
     restart: unless-stopped
@@ -23,6 +25,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  grafana-lgtm:
+    image: 'grafana/otel-lgtm:latest'
+    ports:
+      - '3000:3000'
+      - '4317:4317'
+      - '4318:4318'
 
 volumes:
   pgdata:

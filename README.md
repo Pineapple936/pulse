@@ -30,6 +30,7 @@
 | **Контейнеризация** | Docker, Docker Compose |
 | **Тесты** | JUnit 5, Mockito, AssertJ, JaCoCo |
 | **Утилиты** | Lombok |
+| **Наблюдаемость** | OpenTelemetry (трейсы, метрики, логи) → Grafana LGTM (OTLP) |
 
 > ⚠️ Проект использует **jOOQ**, а не JPA/Hibernate. Классы `*Record` (`UserRecord`, `WorkoutRecord` и т.д.) **генерируются** из схемы БД в `target/generated-sources/jooq` во время сборки.
 
@@ -52,9 +53,10 @@ POSTGRES_DB=pulse
 POSTGRES_USER=admin
 POSTGRES_PASSWORD=admin
 JWT_SECRET=<base64-секрет для подписи HS256, минимум 256 бит>
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 ```
 
-Эти переменные использует и Docker Compose, и Maven-плагин кодогенерации jOOQ, и само приложение (`application.properties`).
+Эти переменные использует и Docker Compose, и Maven-плагин кодогенерации jOOQ, и само приложение (`application.yaml`).
 
 > 🔐 **Не коммить `.env` в git** — в нём пароль БД и ключ подписи токенов. Добавь `.env` в `.gitignore`, а в репозитории держи шаблон `.env.example` с ключами без реальных значений. Если секреты уже попадали в историю, для боевого окружения их следует сменить.
 
@@ -112,6 +114,27 @@ open target/site/jacoco/index.html
 ```
 
 Сгенерированный код (jOOQ, MapStruct) из отчёта исключён.
+
+---
+
+## 📈 Логи, трейсы и метрики (OpenTelemetry)
+
+Приложение экспортирует трейсы, метрики и логи по OTLP в стек **Grafana LGTM** (`grafana-lgtm` в Docker Compose: Loki + Grafana + Tempo + Mimir/Prometheus в одном контейнере).
+
+- Grafana доступна на `http://localhost:3000`
+- OTLP-коллектор слушает `4317` (gRPC) и `4318` (HTTP)
+- Требуется **Spring Boot 4.0.1+** — до этой версии автоконфигурация экспорта логов (`OtlpLoggingAutoConfiguration`) была частью модуля `actuator`
+
+Как это настроено:
+
+1. Зависимость `io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0` в `pom.xml` — добавляет Logback-appender, который умеет слать логи в OpenTelemetry SDK.
+2. `src/main/resources/logback-spring.xml` — подключает appender `OTEL` в root-логгер рядом с `CONSOLE`.
+3. `com.pulse.config.OpenTelemetryLoggingConfig` — бин, который после старта контекста вызывает `OpenTelemetryAppender.install(...)`, передавая appender'у автоконфигурированный `OpenTelemetry`.
+4. Эндпоинты OTLP заданы в `application.yaml` (`management.opentelemetry.*`, `management.otlp.metrics.export.url`) через переменную окружения `OTEL_EXPORTER_OTLP_ENDPOINT`, по умолчанию `http://localhost:4318`.
+
+`OTEL_EXPORTER_OTLP_ENDPOINT` задаётся в `.env` (для локального запуска, Вариант 2) и переопределяется в `docker-compose.yml` на `http://grafana-lgtm:4318` для контейнера `backend` — при полном запуске в Docker (Вариант 1) он не может достучаться до `localhost` хоста, поэтому обращается к сервису `grafana-lgtm` по имени в общей docker-сети.
+
+Проверить, что логи доходят: Grafana → **Explore** → источник **Loki** → выбрать `service_name="pulse"`.
 
 ---
 
@@ -197,13 +220,14 @@ open target/site/jacoco/index.html
 ```
 pulse/
 ├── src/main/java/com/pulse/
-│   ├── config/          # SecurityConfig (JWT, stateless)
+│   ├── config/          # SecurityConfig (JWT, stateless), OpenTelemetryLoggingConfig
 │   ├── controller/      # REST-контроллеры, DTO (request/response), MapStruct-мапперы, обработчик ошибок
 │   ├── repository/      # доступ к данным через jOOQ DSLContext
 │   ├── service/         # бизнес-логика: auth, user, workout, exercise, progress, security, access
 │   └── PulseApplication.java
 ├── src/main/resources/
-│   ├── application.properties
+│   ├── application.yaml
+│   ├── logback-spring.xml  # OpenTelemetry-appender для экспорта логов по OTLP
 │   └── db/changelog/    # миграции Liquibase
 ├── src/test/java/com/pulse/   # unit-, MockMvc- и @JooqTest-тесты
 ├── docker-compose.yml
